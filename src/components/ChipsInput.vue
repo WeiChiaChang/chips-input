@@ -1,25 +1,26 @@
 <template>
-  <div class="chip-container">
+  <div class="ChipsInput">
     <div
-      class="chip"
-      v-for="(chip, i) of chips"
-      :key="chip.label"
+      class="ChipsInput__chipWrapper"
+      v-for="(chip) of chips"
+      :key="chip.id"
     >
-      <div class="chip-wrapper">
+      <div class="ChipsInput__contentWrapper">
         <Editable
-          class="chip__content"
-          :content="chip"
-          @update="updateChip(chip, i, $event)"
+          class="ChipsInput__content"
+          :content="chip.value"
+          @update="updateChip(chip.id, $event)"
         />
-        <i class="material-icons" @click="deleteChip(i)">clear</i>
+        <i class="ChipsInput__deleteIcon material-icons" @click="deleteChip(chip.id)">clear</i>
       </div>
-      <span class="semicolon">;</span>
+      <span class="ChipsInput__semicolon">;</span>
     </div>
     <input
-      class="current-input"
+      class="ChipsInput__currentInput"
       v-model="currentInput"
       @keypress.enter="saveChip"
       @keydown.delete="backspaceDelete"
+      @blur="saveChip"
     />
   </div>
 </template>
@@ -38,18 +39,32 @@ export default {
     };
   },
   methods: {
-    updateChip(chip, index, $event) {
-      chip = $event;
-      this.$set(this.chips, index, $event);
+    updateChip(id, $event) {
+      if ($event === '') {
+        const chipIndex = this.chips.findIndex(i => i.id === id);
+        this.$delete(this.chips, chipIndex);
+      } else {
+        const chip = this.chips.find(i => i.id === id);
+        this.$set(chip, 'value', $event);
+      }
     },
     saveChip() {
       const { chips, currentInput } = this;
-      (chips.indexOf(currentInput) === -1) &&
-        chips.push(currentInput);
+      const chipsContent = chips.map(i => i.value);
+      if (
+        chipsContent.indexOf(currentInput) === -1 &&
+        currentInput !== ''
+      ) {
+        chips.push({
+          id: Math.random().toString(36).substr(2, 9),
+          value: currentInput
+        });
+      }
       this.currentInput = "";
     },
-    deleteChip(index) {
-      this.chips.splice(index, 1);
+    deleteChip(id) {
+      const chipIndex = this.chips.findIndex(i => i.id === id);
+      this.chips.splice(chipIndex, 1);
     },
     backspaceDelete({ which }) {
       which === 8 &&
@@ -61,7 +76,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.chip-container {
+.ChipsInput {
   width: 400px;
   padding: 4px;
   border: 1px solid #ccc;
@@ -69,39 +84,37 @@ export default {
   display: flex;
   flex-wrap: wrap;
   align-content: space-between;
-
-  .chip {
+  &__chipWrapper {
     margin: 4px 0;
     padding: 0px 4px;
     display: flex;
     align-items: center;
     height: 24px;
-    .chip-wrapper {
-      display: flex;
-      align-items: center;
-      &:hover {
-        border-bottom: 1px solid #ccc;
-      }
-    }
-    .chip__content {
-      outline: none;
-      -webkit-appearance: none;
-      border: 0 solid transparent;
-      background: transparent;
-      padding: 0;
-    }
-    i {
-      cursor: pointer;
-      opacity: 0.56;
-      margin-left: 8px;
-    }
-    .semicolon {
-      color: #ccc;
-      margin: 0 5px;
+  }
+  &__contentWrapper {
+    display: flex;
+    align-items: center;
+    &:hover {
+      border-bottom: 1px solid #ccc;
     }
   }
-  .current-input {
-    // flex: 1 1 auto;
+  &__content {
+    outline: none;
+    -webkit-appearance: none;
+    border: 0 solid transparent;
+    background: transparent;
+    padding: 0;
+  }
+  &__deleteIcon {
+    cursor: pointer;
+    opacity: 0.56;
+    margin-left: 8px;
+  }
+  &__semicolon {
+    color: #ccc;
+    margin: 0 5px;
+  }
+  &__currentInput {
     width: 3rem;
     height: 24px;
     border: none;
