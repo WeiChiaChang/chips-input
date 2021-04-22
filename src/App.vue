@@ -1,17 +1,16 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <ChipsInput />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
+import ChipsInput from './components/ChipsInput.vue'
 
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    ChipsInput
   }
 }
 </script>
